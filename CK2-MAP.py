@@ -8,6 +8,7 @@ import re
 import ctypes
 import tkinter as tk
 from tkinter import messagebox
+from PIL import Image, ImageTk  # Ensure you have Pillow installed: pip install pillow
 
 running = False
 MEMORY_THRESHOLD_MB = 200
@@ -158,27 +159,67 @@ def log_message(message):
     log_text.insert(tk.END, message + "\n")
     log_text.see(tk.END)
 
+# GUI
+# Load and resize background image dynamically to fit the window
+def update_bg(event=None):
+    global bg_photo
+    resized_image = bg_image.resize((root.winfo_width(), root.winfo_height()), Image.Resampling.LANCZOS)
+    bg_photo = ImageTk.PhotoImage(resized_image)
+    bg_label.config(image=bg_photo)
+
 root = tk.Tk()
-root.title("Crusader Kings 2 Modded Achievements Patcher [MAP] | Designed by JihadiJackassStudios")
-root.geometry("400x550")
+root.title("Crusader Kings 2 Modded Achievements Patcher")
+root.geometry("500x600")
 
-tk.Label(root, text="Crusader Kings 2 Patcher", font=("Impact", 18)).pack(pady=10)
+# Load Background Image
+bg_image = Image.open("background.png")
+bg_photo = ImageTk.PhotoImage(bg_image)
 
-tk.Label(root, text="This tool was designed with the purpose of allowing users to earn achievements in a modded Crusader Kings 2 game.\n\nThis is only able to be used in Singleplayer.", 
-         font=("TimesNewRoman", 10), wraplength=380, justify="center").pack(pady=5)
+# Set Background Label
+bg_label = tk.Label(root, image=bg_photo)
+bg_label.place(relwidth=1, relheight=1)
 
-tk.Label(root, text="How to use", font=("Impact", 14)).pack(pady=10)
+# Update background on window resize
+root.bind("<Configure>", update_bg)
 
-tk.Label(root, text="- Launch both MAP and CK2 Launcher (NOT the main menu)\n(it does not matter which program you load first.)\n- Apply the patch in the CK2 launcher\n- You are now able to play, save, and load with mods in ironman.", 
-         font=("Arial", 10), wraplength=380, justify="center").pack(pady=5)
+# Ensure all widgets are placed on top of the canvas
+title_label = tk.Label(root, text="Crusader Kings 2 Modded Achievements Patcher", font=("Old English Text MT", 16), fg="white", bg="#3e2723")
+title_label.pack(pady=10)
 
-monitor_button = tk.Button(root, text="Apply Patch", command=start_monitoring)
+# Instruction text
+instructions = """
+This tool allows earning achievements in modded CK2 games.
+
+Instructions:
+1. Start the CK2 launcher.
+2. Apply the patch using this tool.
+3. Start the game and play with mods in Ironman mode!
+"""
+
+instructions_label = tk.Label(root, text=instructions, font=("Times New Roman", 12), fg="white", bg="#4e342e", wraplength=450, justify="center")
+instructions_label.pack(pady=5)
+
+def on_enter(e):
+    e.widget.config(bg="#5456A0")  # Highlighted blue color
+
+def on_leave(e):
+    e.widget.config(bg="#424478")  # Default blue color
+
+# Apply Patch Button
+monitor_button = tk.Button(root, text="Apply Patch", command=patch_memory, font=("Arial", 12), bg="#424478", fg="white", relief="ridge")
 monitor_button.pack(pady=5)
+monitor_button.bind("<Enter>", on_enter)
+monitor_button.bind("<Leave>", on_leave)
 
-tk.Button(root, text="Cancel Patch / Clear Log", command=stop_monitoring).pack(pady=5)
-tk.Button(root, text="Exit", command=root.destroy).pack(pady=5)
+# Exit Button
+exit_button = tk.Button(root, text="Exit", command=root.quit, font=("Arial", 12), bg="#424478", fg="white", relief="ridge")
+exit_button.pack(pady=5)
+exit_button.bind("<Enter>", on_enter)
+exit_button.bind("<Leave>", on_leave)
 
-tk.Label(root, text="Logging:", font=("Arial", 10, "bold")).pack(anchor="w", padx=10)
-log_text = tk.Text(root, height=8, width=50, state=tk.NORMAL)
+# Logging UI
+tk.Label(root, text="Log:", font=("Arial", 10, "bold"), bg="#3e2723", fg="white").pack(anchor="w", padx=10)
+log_text = tk.Text(root, height=10, width=60, state=tk.NORMAL, bg="#5d4037", fg="white")
 log_text.pack(padx=10, pady=5, expand=True, fill="both")
+
 root.mainloop()
