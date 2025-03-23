@@ -138,7 +138,7 @@ def monitor_ck2():
             patch_memory()
             return
         time.sleep(1)
-    monitor_button.config(text="Start Monitoring", state=tk.NORMAL)
+    monitor_button.config(text="Start Patching", state=tk.NORMAL)
 
 def start_monitoring():
     global running, launcher_detected
@@ -159,7 +159,10 @@ def log_message(message):
     log_text.insert(tk.END, message + "\n")
     log_text.see(tk.END)
 
-# GUI
+###########
+#   GUI   #
+###########
+
 # Load and resize background image dynamically to fit the window
 def update_bg(event=None):
     global bg_photo
@@ -168,8 +171,14 @@ def update_bg(event=None):
     bg_label.config(image=bg_photo)
 
 root = tk.Tk()
-root.title("Crusader Kings 2 Modded Achievements Patcher")
+root.title("CK2 MAP | Made By JihadiJackass")
 root.geometry("500x600")
+
+# Set program icon
+try:
+    root.iconbitmap("ck2_icon.ico")  # Ensure ck2_icon.ico is in the same directory as the script
+except Exception as e:
+    log_message(f"ERROR: Failed to load icon - {e}")
 
 # Load Background Image
 bg_image = Image.open("background.png")
@@ -182,8 +191,9 @@ bg_label.place(relwidth=1, relheight=1)
 # Update background on window resize
 root.bind("<Configure>", update_bg)
 
-# Ensure all widgets are placed on top of the canvas
-title_label = tk.Label(root, text="Crusader Kings 2 Modded Achievements Patcher", font=("Old English Text MT", 16), fg="white", bg="#3e2723")
+# Ensure the title label is transparent and overlays the background properly
+title_label = tk.Label(root, text="Crusader Kings 2 Modded Achievements Patcher", 
+                       font=("Impact", 16), fg="gold", bg="#424478", relief="flat")
 title_label.pack(pady=10)
 
 # Instruction text
@@ -193,10 +203,10 @@ This tool allows earning achievements in modded CK2 games.
 Instructions:
 1. Start the CK2 launcher.
 2. Apply the patch using this tool.
-3. Start the game and play with mods in Ironman mode!
+3. Start the game and play with mods in Ironman mode.
 """
 
-instructions_label = tk.Label(root, text=instructions, font=("Times New Roman", 12), fg="white", bg="#4e342e", wraplength=450, justify="center")
+instructions_label = tk.Label(root, text=instructions, font=("Times New Roman", 12), fg="white", bg="#2E3B60", wraplength=450, justify="center")
 instructions_label.pack(pady=5)
 
 def on_enter(e):
@@ -219,7 +229,7 @@ exit_button.bind("<Leave>", on_leave)
 
 # Logging UI
 tk.Label(root, text="Log:", font=("Arial", 10, "bold"), bg="#3e2723", fg="white").pack(anchor="w", padx=10)
-log_text = tk.Text(root, height=10, width=60, state=tk.NORMAL, bg="#5d4037", fg="white")
+log_text = tk.Text(root, height=10, width=60, state=tk.NORMAL, bg="#2E3B60", fg="white", insertbackground="white")
 log_text.pack(padx=10, pady=5, expand=True, fill="both")
 
 root.mainloop()
