@@ -1,0 +1,2299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="31">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>4498</ID>
+      <Description>"[X] &lt;== Crusader Kings II v3.3.3 Extension"</Description>
+      <Options moHideChildren="1" moDeactivateChildrenAsWell="1"/>
+      <LastState Value="" RealAddress="00000000"/>
+      <Color>FF0000</Color>
+      <GroupHeader>1</GroupHeader>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>4770</ID>
+          <Description>"[X] &lt;== Enable Console/Developer Mode in Ironman"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <Color>C08000</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>//=========================================
+[ENABLE]
+//=========================================
+label(CHP1)
+label(CHP2)
+label(CHP3)
+registersymbol(CHP1)
+registersymbol(CHP2)
+registersymbol(CHP3)
+
+AobScanModule(aob1, $process, ?? ?? 48 8B D9 80 B8 00 05 00 00 00 75 ??) //show console
+AobScanModule(aob2, $process, 8B 1D ?? ?? ?? ?? 4C 39 AB F0 04 00 00 ??) //enable console
+AobScanModule(aob3, $process, E8 ?? ?? ?? ?? C6 40 61 00 0F B6 45 A7 88) //uncorrupt save files
+
+//=========================================
+// Actual script
+//=========================================
+
+//Removes the check for showing the console
+aob1+5:
+CHP1:
+ nop
+ nop
+ nop
+ nop
+ nop
+ cmp eax,eax
+
+//Removes the check for ironman mode
+aob2+6:
+CHP2:
+ nop
+ nop
+ nop
+ nop
+ nop
+ cmp eax,eax
+
+aob3+5:
+CHP3:
+ mov byte ptr [eax+35],01
+
+//=========================================
+[DISABLE]
+//=========================================
+CHP1:
+//cmp byte ptr [rax+00000500],00
+ db 80 B8 00 05 00 00 00
+CHP2:
+//cmp [rbx+000004F0],r13
+ db 4C 39 AB F0 04 00 00
+CHP3:
+//mov byte ptr [rax+61],00
+ db C6 40 61 00
+
+unregistersymbol(CHP)
+unregistersymbol(CHP2)
+unregistersymbol(CHP3)
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>4771</ID>
+              <Description>"!-- List of console commands on the wiki --!"</Description>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>0080FF</Color>
+              <GroupHeader>1</GroupHeader>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4772</ID>
+              <Description>"http://www.ckiiwiki.com/Console_commands"</Description>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>0080FF</Color>
+              <GroupHeader>1</GroupHeader>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4835</ID>
+          <Description>"[X] &lt;== Enable Ironman/Achievements with Ruler Designer/Mods"</Description>
+          <Options moHideChildren="1"/>
+          <LastState/>
+          <Color>C08000</Color>
+          <VariableType>Auto Assembler Script</VariableType>
+          <AssemblerScript>//=========================================
+[ENABLE]
+//=========================================
+
+AobScanModule(aob_ironman,        $process, 0F B6 83 F9 02 00 00 48)
+AobScanModule(aob_ruler_designer, $process, C6 40 62 01 48 8B 8B 10 6C 00 00)
+AobScanModule(aob_savegame_check, $process, 88 46 61 48 8B 03 )
+AobScanModule(aob_checksum_check, $process, 88 4F 63 48 8B 46 30 )
+
+alloc(achievement_script,8192,$process))
+
+label(set_ironman)
+label(return_ironman)
+label(set_ruler_designer)
+label(return_ruler_designer)
+label(set_savegame_check)
+label(return_savegame_check)
+label(set_checksum_check)
+label(return_checksum_check)
+
+label(base_ironman_pointer)
+label(base_achievement_pointer)
+
+registersymbol(set_ironman)
+registersymbol(return_ironman)
+registersymbol(set_ruler_designer)
+registersymbol(return_ruler_designer)
+registersymbol(set_savegame_check)
+registersymbol(return_savegame_check)
+registersymbol(set_checksum_check)
+registersymbol(return_checksum_check)
+
+registersymbol(base_ironman_pointer)
+registersymbol(base_achievement_pointer)
+
+registersymbol(aob_ironman)
+registersymbol(aob_ruler_designer)
+registersymbol(aob_savegame_check)
+registersymbol(aob_checksum_check)
+
+//=========================================
+// Actual script
+//=========================================
+achievement_script:
+
+set_ironman:
+  mov [base_ironman_pointer], rbx
+  mov [rbx+000002F9], 1
+  movzx eax,byte ptr [rbx+000002F9]
+ jmp return_ironman
+
+set_ruler_designer:
+  mov [base_achievement_pointer], rax
+  mov byte ptr [rax+61],01                 //Set Save file unaltered = 1
+  mov byte ptr [rax+62],00                 //Set Ruler designer used = 0
+  mov byte ptr [rax+63],01                 //Set Checksum is vanilla = 1
+  mov byte ptr [rax+65],01                 //Set Steam is enabled    = 1
+  mov rcx,[rbx+00006C10]
+ jmp return_ruler_designer
+
+set_savegame_check:
+  mov [base_achievement_pointer], rsi
+  mov byte ptr [rsi+61],01                 //Set Save file unaltered = 1
+  mov byte ptr [rsi+62],00                 //Set Ruler designer used = 0
+  mov byte ptr [rsi+63],01                 //Set Checksum is vanilla = 1
+  mov byte ptr [rsi+65],01                 //Set Steam is enabled    = 1
+  mov rax,[rbx]
+ jmp return_savegame_check
+
+set_checksum_check:
+  mov [base_achievement_pointer], rdi
+  mov byte ptr [rdi+61],01                 //Set Save file unaltered = 1
+  mov byte ptr [rdi+62],00                 //Set Ruler designer used = 0
+  mov byte ptr [rdi+63],01                 //Set Checksum is vanilla = 1
+  mov byte ptr [rdi+65],01                 //Set Steam is enabled    = 1
+  mov rax,[rsi+30]
+ jmp return_checksum_check
+
+//=========================================
+// Variables
+//=========================================
+
+base_ironman_pointer:
+  dq 0
+
+base_achievement_pointer:
+  dq 0
+
+//=========================================
+// Hack points
+//=========================================
+
+aob_ironman:
+  jmp set_ironman
+  nop 2
+return_ironman:
+
+aob_ruler_designer:
+  jmp set_ruler_designer
+  nop 6
+return_ruler_designer:
+
+aob_savegame_check:
+  jmp set_savegame_check
+  nop
+return_savegame_check:
+
+aob_checksum_check:
+  jmp set_checksum_check
+  nop 2
+return_checksum_check:
+
+//=========================================
+[DISABLE]
+//=========================================
+
+aob_ironman:
+  // movzx eax,byte ptr [rbx+000002F9]
+  db 0F B6 83 F9 02 00 00
+
+aob_ruler_designer:
+  // mov byte ptr [rax+62],01
+  // mov rcx,[rbx+00006C10]
+  db C6 40 62 01 48 8B 8B 10 6C 00 00
+
+aob_savegame_check:
+  // mov [rsi+61],al
+  // mov rax,[rbx]
+  db 88 46 61 48 8B 03
+
+aob_checksum_check:
+  // mov [rdi+63],cl
+  // mov rax,[rsi+30]
+  db 88 4F 63 48 8B 46 30
+
+unregistersymbol(set_ironman)
+unregistersymbol(return_ironman)
+unregistersymbol(set_ruler_designer)
+unregistersymbol(return_ruler_designer)
+unregistersymbol(set_savegame_check)
+unregistersymbol(return_savegame_check)
+unregistersymbol(set_checksum_check)
+unregistersymbol(return_checksum_check)
+
+unregistersymbol(base_ironman_pointer)
+unregistersymbol(base_achievement_pointer)
+
+unregistersymbol(aob_ironman)
+unregistersymbol(aob_ruler_designer)
+unregistersymbol(aob_savegame_check)
+unregistersymbol(aob_checksum_check)
+
+dealloc(achievement_script)
+</AssemblerScript>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>4836</ID>
+              <Description>"Activate this script in the launcher, before starting the game."</Description>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>0080FF</Color>
+              <GroupHeader>1</GroupHeader>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4752</ID>
+          <Description>"[X] &lt;======== Achievement debug pointers ============="</Description>
+          <Options moHideChildren="1"/>
+          <LastState Value="" RealAddress="00000000"/>
+          <Color>000080</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>4765</ID>
+              <Description>"!-- These are now managed by the scripts above --!"</Description>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>0080FF</Color>
+              <GroupHeader>1</GroupHeader>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4844</ID>
+              <Description>"[X] &lt;== Dynamic (Needs script)"</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" Activated="1" RealAddress="00000000"/>
+              <Color>008000</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address/>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>4845</ID>
+                  <Description>"Ironman enabled?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>base_ironman_pointer</Address>
+                  <Offsets>
+                    <Offset>2F9</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4846</ID>
+                  <Description>"Save File Unaltered?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>base_achievement_pointer</Address>
+                  <Offsets>
+                    <Offset>61</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4847</ID>
+                  <Description>"Checksum ok/no mods?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>base_achievement_pointer</Address>
+                  <Offsets>
+                    <Offset>63</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4848</ID>
+                  <Description>"Steam Enabled?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>base_achievement_pointer</Address>
+                  <Offsets>
+                    <Offset>65</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4849</ID>
+                  <Description>"Ruler designer used?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>base_achievement_pointer</Address>
+                  <Offsets>
+                    <Offset>62</Offset>
+                  </Offsets>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4838</ID>
+              <Description>"[X] &lt;== Static (Breaks after update)"</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" Activated="1" RealAddress="00000000"/>
+              <Color>008000</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address/>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>4751</ID>
+                  <Description>"Ironman enabled?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <LastState Value="1" RealAddress="1D3CA370399"/>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>"CK2game.exe"+17F1070</Address>
+                  <Offsets>
+                    <Offset>2F9</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4768</ID>
+                  <Description>"Save File Unaltered?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <LastState Value="1" RealAddress="1D3A37F2F31"/>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>"CK2game.exe"+16E22A0</Address>
+                  <Offsets>
+                    <Offset>61</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4502</ID>
+                  <Description>"Checksum ok/no mods?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <LastState Value="1" RealAddress="1D3A37F2F33"/>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>"CK2game.exe"+16E22A0</Address>
+                  <Offsets>
+                    <Offset>63</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4762</ID>
+                  <Description>"Steam Enabled?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <LastState Value="1" RealAddress="1D3A37F2F35"/>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>"CK2game.exe"+16E22A0</Address>
+                  <Offsets>
+                    <Offset>65</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4764</ID>
+                  <Description>"Ruler designer used?"</Description>
+                  <DropDownList DisplayValueAsItem="1">1:Yes
+0:No
+</DropDownList>
+                  <LastState Value="0" RealAddress="1D3A37F2F32"/>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>"CK2game.exe"+16E22A0</Address>
+                  <Offsets>
+                    <Offset>62</Offset>
+                  </Offsets>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>4504</ID>
+          <Description>"[X] &lt;======== Pointers (Requires Recifence's Script) ========"</Description>
+          <Options moHideChildren="1"/>
+          <LastState Value="" RealAddress="00000000"/>
+          <Color>000080</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>4505</ID>
+              <Description>"[X] &lt;== Ruler/Nation ========================="</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>008000</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>4506</ID>
+                  <Description>"[X] &lt;== Nation ======================"</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4507</ID>
+                      <Description>"Money ==&gt; (x32768)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>8 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>1B4</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4508</ID>
+                      <Description>"Military Technology Points ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>2D8</Offset>
+                        <Offset>8</Offset>
+                        <Offset>B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4509</ID>
+                      <Description>"Economy Technology Points ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>2DC</Offset>
+                        <Offset>8</Offset>
+                        <Offset>B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4510</ID>
+                      <Description>"Cultural Technology Points ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>2E0</Offset>
+                        <Offset>8</Offset>
+                        <Offset>B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4775</ID>
+                      <Description>"Prestige ==&gt;(x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>1A4</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4512</ID>
+                      <Description>"Piety ==&gt;(x1000)"</Description>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>1A8</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4513</ID>
+                  <Description>"[X] &lt;== General Character Info ==========="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4514</ID>
+                      <Description>"Ruler Name (&lt;16)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>16</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>38</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4515</ID>
+                      <Description>"Ruler Name (&gt;=16)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>32</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>38</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4516</ID>
+                      <Description>"CharID (Don't Change This)"</Description>
+                      <Color>0000FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>14</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4517</ID>
+                      <Description>"Current Religion Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>168</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4518</ID>
+                          <Description>"Religion Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>228</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4519</ID>
+                          <Description>"Religion Name (&gt;=16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>228</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4520</ID>
+                      <Description>"Current Culture Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>170</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4521</ID>
+                          <Description>"Culture Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>100</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4522</ID>
+                          <Description>"Culture Name (&gt;=16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>100</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4778</ID>
+                      <Description>"Current Government Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>88</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4779</ID>
+                          <Description>"Government Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>348</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4780</ID>
+                          <Description>"Government Name (=&gt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>348</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4527</ID>
+                      <Description>"Born Date ==&gt; (Please have a look at Table Extras)"</Description>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>b8</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4528</ID>
+                          <Description>"Current Date (Don't Change This)"</Description>
+                          <Color>0000FF</Color>
+                          <VariableType>4 Bytes</VariableType>
+                          <Address>iDate</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4529</ID>
+                          <Description>"One year = 365 days * 24 hours =&gt; 8760 hours"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4530</ID>
+                          <Description>"50 years old = 50 * 8760       =&gt;   438000 hours"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4531</ID>
+                          <Description>"Suppose Current is 15-Sep-1066 =&gt; 53144328"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4532</ID>
+                          <Description>"Born date = Cur. date - 438080 =&gt; 52706328 "</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4533</ID>
+                  <Description>"[X] &lt;== Main Stats ==================="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4534</ID>
+                      <Description>"Base Diplomacy value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>1E1</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4535</ID>
+                      <Description>"Base Martial value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>1E2</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4536</ID>
+                      <Description>"Base Stewardship value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>1E3</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4537</ID>
+                      <Description>"Base Intrigue value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>1E4</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4538</ID>
+                      <Description>"Base Learning value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>1E5</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4539</ID>
+                  <Description>"[X] &lt;== Health Stats =================="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4540</ID>
+                      <Description>"Base Fertility ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>194</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4542</ID>
+                      <Description>"Base Health ==&gt;(x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pPlayer</Address>
+                      <Offsets>
+                        <Offset>19c</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4543</ID>
+                  <Description>"[X] &lt;== Portrait ====================="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4544</ID>
+                      <Description>"!-- Pause the game while using this --!"</Description>
+                      <LastState Value="" RealAddress="00000000"/>
+                      <Color>0080FF</Color>
+                      <GroupHeader>1</GroupHeader>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4545</ID>
+                      <Description>"[X] &lt;== DNA ==&gt; (Change at your peril)"</Description>
+                      <Options moHideChildren="1"/>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>800080</Color>
+                      <VariableType>String</VariableType>
+                      <Length>11</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>178</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4546</ID>
+                          <Description>"!-- Read the wiki for more info --!"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4547</ID>
+                          <Description>"http://www.ckiiwiki.com/Portrait_modding#DNA"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4548</ID>
+                          <Description>"Neck"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4549</ID>
+                          <Description>"Chin"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+1</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4550</ID>
+                          <Description>"Mouth"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+2</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4551</ID>
+                          <Description>"Nose"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+3</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4552</ID>
+                          <Description>"Cheeks"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+4</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4553</ID>
+                          <Description>"Unused"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+5</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4554</ID>
+                          <Description>"Eyes"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+6</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4555</ID>
+                          <Description>"Ears"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+7</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4556</ID>
+                          <Description>"Hair Color"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+8</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4557</ID>
+                          <Description>"Eye Color"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+9</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4558</ID>
+                          <Description>"Unused"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+A</Address>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4559</ID>
+                      <Description>"[X] &lt;== Properties ==&gt; (Change at your peril)"</Description>
+                      <Options moHideChildren="1"/>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>800080</Color>
+                      <VariableType>String</VariableType>
+                      <Length>12</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>190</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4560</ID>
+                          <Description>"!-- Read the wiki for more info --!"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4561</ID>
+                          <Description>"http://www.ckiiwiki.com/Portrait_modding#Properties"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4562</ID>
+                          <Description>"Background"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4563</ID>
+                          <Description>"Hair"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+1</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4564</ID>
+                          <Description>"Base Head"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+2</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4565</ID>
+                          <Description>"Clothes"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+3</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4566</ID>
+                          <Description>"Beard"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+4</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4567</ID>
+                          <Description>"Headgear"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+5</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4568</ID>
+                          <Description>"Imprisoned"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+6</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4569</ID>
+                          <Description>"Scars"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+7</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4570</ID>
+                          <Description>"Red Dots"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+8</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4571</ID>
+                          <Description>"Boils"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+9</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4572</ID>
+                          <Description>"Blinded"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+A</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4573</ID>
+                          <Description>"Player"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+B</Address>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4574</ID>
+                      <Description>"Current Portrait Ethnicity Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>1B0</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4575</ID>
+                          <Description>"Ethnicity Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>98</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4576</ID>
+                          <Description>"Ethnicity Name (&gt;=16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>98</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4776</ID>
+                      <Description>"Current Portrait Ethnicity Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>16</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pOwner</Address>
+                      <Offsets>
+                        <Offset>C0</Offset>
+                        <Offset>1B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4585</ID>
+              <Description>"[X] &lt;== Selected Ruler/Nation ==================="</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>008000</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>4586</ID>
+                  <Description>"[X] &lt;== Nation ======================"</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4587</ID>
+                      <Description>"Money ==&gt; (x32768)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>8 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>1B4</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4781</ID>
+                      <Description>"Military Technology Points ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>2D8</Offset>
+                        <Offset>8</Offset>
+                        <Offset>B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4782</ID>
+                      <Description>"Economy Technology Points ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>2DC</Offset>
+                        <Offset>8</Offset>
+                        <Offset>B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4783</ID>
+                      <Description>"Cultural Technology Points ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>2E0</Offset>
+                        <Offset>8</Offset>
+                        <Offset>B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4591</ID>
+                      <Description>"Prestige ==&gt;(x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>1A4</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4592</ID>
+                      <Description>"Piety ==&gt;(x1000)"</Description>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>1A8</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4593</ID>
+                  <Description>"[X] &lt;== General Character Info ==========="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4594</ID>
+                      <Description>"Ruler Name (&lt;16)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>16</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>38</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4595</ID>
+                      <Description>"Ruler Name (&gt;=16)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>32</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>38</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4596</ID>
+                      <Description>"CharID (Don't Change This)"</Description>
+                      <Color>0000FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>14</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4597</ID>
+                      <Description>"Current Religion Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>168</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4784</ID>
+                          <Description>"Religion Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>228</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4785</ID>
+                          <Description>"Religion Name (&gt;=16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>228</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4786</ID>
+                      <Description>"Current Culture Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>170</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4787</ID>
+                          <Description>"Culture Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>100</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4788</ID>
+                          <Description>"Culture Name (&gt;=16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>100</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4789</ID>
+                      <Description>"Current Government Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>88</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4790</ID>
+                          <Description>"Government Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>348</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4791</ID>
+                          <Description>"Government Name (=&gt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>348</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4792</ID>
+                      <Description>"Born Date ==&gt; (Please have a look at Table Extras)"</Description>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>b8</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4793</ID>
+                          <Description>"Current Date (Don't Change This)"</Description>
+                          <Color>0000FF</Color>
+                          <VariableType>4 Bytes</VariableType>
+                          <Address>iDate</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4794</ID>
+                          <Description>"One year = 365 days * 24 hours =&gt; 8760 hours"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4795</ID>
+                          <Description>"50 years old = 50 * 8760       =&gt;   438000 hours"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4796</ID>
+                          <Description>"Suppose Current is 15-Sep-1066 =&gt; 53144328"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4797</ID>
+                          <Description>"Born date = Cur. date - 438080 =&gt; 52706328 "</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4612</ID>
+                  <Description>"[X] &lt;== Main Stats ==================="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4613</ID>
+                      <Description>"Base Diplomacy value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>1E1</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4614</ID>
+                      <Description>"Base Martial value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>1E2</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4615</ID>
+                      <Description>"Base Stewardship value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>1E3</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4616</ID>
+                      <Description>"Base Intrigue value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>1E4</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4617</ID>
+                      <Description>"Base Learning value ==&gt; (x1)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>Byte</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>1E5</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4618</ID>
+                  <Description>"[X] &lt;== Health Stats =================="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4619</ID>
+                      <Description>"Base Fertility ==&gt; (x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>194</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4621</ID>
+                      <Description>"Base Health value ==&gt;(x1000)"</Description>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelPlayer</Address>
+                      <Offsets>
+                        <Offset>19c</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>4622</ID>
+                  <Description>"[X] &lt;== Portrait ====================="</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Value="" RealAddress="00000000"/>
+                  <Color>800000</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>4798</ID>
+                      <Description>"!-- Pause the game while using this --!"</Description>
+                      <LastState Value="" RealAddress="00000000"/>
+                      <Color>0080FF</Color>
+                      <GroupHeader>1</GroupHeader>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4799</ID>
+                      <Description>"[X] &lt;== DNA ==&gt; (Change at your peril)"</Description>
+                      <Options moHideChildren="1"/>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>800080</Color>
+                      <VariableType>String</VariableType>
+                      <Length>11</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>178</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4800</ID>
+                          <Description>"!-- Read the wiki for more info --!"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4801</ID>
+                          <Description>"http://www.ckiiwiki.com/Portrait_modding#DNA"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4802</ID>
+                          <Description>"Neck"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4803</ID>
+                          <Description>"Chin"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+1</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4804</ID>
+                          <Description>"Mouth"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+2</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4805</ID>
+                          <Description>"Nose"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+3</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4806</ID>
+                          <Description>"Cheeks"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+4</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4807</ID>
+                          <Description>"Unused"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+5</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4808</ID>
+                          <Description>"Eyes"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+6</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4809</ID>
+                          <Description>"Ears"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+7</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4810</ID>
+                          <Description>"Hair Color"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+8</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4811</ID>
+                          <Description>"Eye Color"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+9</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4812</ID>
+                          <Description>"Unused"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+A</Address>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4813</ID>
+                      <Description>"[X] &lt;== Properties ==&gt; (Change at your peril)"</Description>
+                      <Options moHideChildren="1"/>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>800080</Color>
+                      <VariableType>String</VariableType>
+                      <Length>12</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>190</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4814</ID>
+                          <Description>"!-- Read the wiki for more info --!"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4815</ID>
+                          <Description>"http://www.ckiiwiki.com/Portrait_modding#Properties"</Description>
+                          <LastState Value="" RealAddress="00000000"/>
+                          <Color>0080FF</Color>
+                          <GroupHeader>1</GroupHeader>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4816</ID>
+                          <Description>"Background"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4817</ID>
+                          <Description>"Hair"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+1</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4818</ID>
+                          <Description>"Base Head"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+2</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4819</ID>
+                          <Description>"Clothes"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+3</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4820</ID>
+                          <Description>"Beard"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+4</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4821</ID>
+                          <Description>"Headgear"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+5</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4822</ID>
+                          <Description>"Imprisoned"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+6</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4823</ID>
+                          <Description>"Scars"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+7</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4824</ID>
+                          <Description>"Red Dots"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+8</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4825</ID>
+                          <Description>"Boils"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+9</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4826</ID>
+                          <Description>"Blinded"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+A</Address>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4827</ID>
+                          <Description>"Player"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>FF8000</Color>
+                          <VariableType>String</VariableType>
+                          <Length>1</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+B</Address>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4828</ID>
+                      <Description>"Current Portrait Ethnicity Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>1B0</Offset>
+                      </Offsets>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>4829</ID>
+                          <Description>"Ethnicity Name (&lt;16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>16</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>98</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                        <CheatEntry>
+                          <ID>4830</ID>
+                          <Description>"Ethnicity Name (&gt;=16) (Don't Change This)"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <Color>0000FF</Color>
+                          <VariableType>String</VariableType>
+                          <Length>32</Length>
+                          <Unicode>0</Unicode>
+                          <CodePage>0</CodePage>
+                          <ZeroTerminate>1</ZeroTerminate>
+                          <Address>+0</Address>
+                          <Offsets>
+                            <Offset>0</Offset>
+                            <Offset>98</Offset>
+                          </Offsets>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>4831</ID>
+                      <Description>"Current Portrait Ethnicity Structure ====&gt;"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>FF00FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>16</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>pSelOwner</Address>
+                      <Offsets>
+                        <Offset>C0</Offset>
+                        <Offset>1B0</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>4664</ID>
+              <Description>"[X] &lt;== Selected County ======================="</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" RealAddress="00000000"/>
+              <Color>008000</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>3274</ID>
+                  <Description>"Country Name (&lt;16) (Don't Change This)"</Description>
+                  <ShowAsHex>1</ShowAsHex>
+                  <Color>0000FF</Color>
+                  <VariableType>String</VariableType>
+                  <Length>16</Length>
+                  <Unicode>0</Unicode>
+                  <CodePage>0</CodePage>
+                  <ZeroTerminate>1</ZeroTerminate>
+                  <Address>pSelCounty</Address>
+                  <Offsets>
+                    <Offset>10</Offset>
+                    <Offset>D48</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>3275</ID>
+                  <Description>"Country Name (&gt;=16) (Don't Change This)"</Description>
+                  <ShowAsHex>1</ShowAsHex>
+                  <Color>0000FF</Color>
+                  <VariableType>String</VariableType>
+                  <Length>32</Length>
+                  <Unicode>0</Unicode>
+                  <CodePage>0</CodePage>
+                  <ZeroTerminate>1</ZeroTerminate>
+                  <Address>pSelCounty</Address>
+                  <Offsets>
+                    <Offset>0</Offset>
+                    <Offset>10</Offset>
+                    <Offset>D48</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>3570</ID>
+                  <Description>"Number of Holding Slots (1-7)"</Description>
+                  <Color>FF00FF</Color>
+                  <VariableType>Byte</VariableType>
+                  <Address>pSelCounty</Address>
+                  <Offsets>
+                    <Offset>DAB</Offset>
+                  </Offsets>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>3276</ID>
+                  <Description>"Religion ==&gt;"</Description>
+                  <ShowAsHex>1</ShowAsHex>
+                  <Color>FF00FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>pSelCounty</Address>
+                  <Offsets>
+                    <Offset>D40</Offset>
+                  </Offsets>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>3277</ID>
+                      <Description>"Religion Name (&lt;16) (Don't Change This)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>0000FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>16</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>+0</Address>
+                      <Offsets>
+                        <Offset>228</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>3322</ID>
+                      <Description>"Religion Name (&gt;=16) (Don't Change This)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>0000FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>32</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>+0</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>228</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>3278</ID>
+                  <Description>"Culture ==&gt;"</Description>
+                  <ShowAsHex>1</ShowAsHex>
+                  <Color>FF00FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>pSelCounty</Address>
+                  <Offsets>
+                    <Offset>D38</Offset>
+                  </Offsets>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>3279</ID>
+                      <Description>"Culture Name (&lt;16) (Don't Change This)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>0000FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>16</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>+0</Address>
+                      <Offsets>
+                        <Offset>100</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>3323</ID>
+                      <Description>"Culture Name (&gt;=16) (Don't Change This)"</Description>
+                      <ShowAsHex>1</ShowAsHex>
+                      <Color>0000FF</Color>
+                      <VariableType>String</VariableType>
+                      <Length>32</Length>
+                      <Unicode>0</Unicode>
+                      <CodePage>0</CodePage>
+                      <ZeroTerminate>1</ZeroTerminate>
+                      <Address>+0</Address>
+                      <Offsets>
+                        <Offset>0</Offset>
+                        <Offset>100</Offset>
+                      </Offsets>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols>
+    <SymbolEntry>
+      <Name>CHP4</Name>
+      <Address>008BB36D</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>iMinGold</Name>
+      <Address>055F0C0E</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>_MonUTest</Name>
+      <Address>009F03FB</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>genderchange</Name>
+      <Address>02A40000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>Recifense</Name>
+      <Address>20190516</Address>
+    </SymbolEntry>
+  </UserdefinedSymbols>
+  <Comments>Info about this table:
+</Comments>
+  <DisassemblerComments>
+    <DisassemblerComment>
+      <Address>"CK2game.exe"+61650F</Address>
+      <Comment>1
+</Comment>
+    </DisassemblerComment>
+  </DisassemblerComments>
+</CheatTable>
