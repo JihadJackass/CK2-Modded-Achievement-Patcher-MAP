@@ -1,0 +1,11 @@
+I'm not patient enough to make this work for every system so here is a python script to build it if the exe does not work.
+
+run this command from the directory of the script.
+
+You will need python, and pyinstaller, which can be a bitch to get working if you are not familiar - Good luck.
+
+I've also included it as a .bat script called README_buildexe.bat
+
+here is the script:
+
+pyinstaller --onefile --windowed --icon=ck2_icon.ico --add-data "background.png;." CK2-MAP.py

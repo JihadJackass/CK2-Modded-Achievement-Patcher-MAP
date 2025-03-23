@@ -4,6 +4,8 @@ import psutil
 import time
 import threading
 import struct
+import os
+import sys
 import re
 import ctypes
 import tkinter as tk
@@ -175,18 +177,33 @@ root.title("CK2 MAP | Made By JihadiJackass")
 root.geometry("500x600")
 
 # Set program icon
-try:
-    root.iconbitmap("ck2_icon.ico")  # Ensure ck2_icon.ico is in the same directory as the script
-except Exception as e:
-    log_message(f"ERROR: Failed to load icon - {e}")
+icon_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "ck2_icon.ico")
+if os.path.exists(icon_path):
+    root.iconbitmap(icon_path)
+else:
+    print("Warning: ck2_icon.ico not found. Skipping icon assignment.")
 
-# Load Background Image
-bg_image = Image.open("background.png")
+# Get the absolute path to the background image
+if getattr(sys, 'frozen', False):
+    bg_image_path = os.path.join(sys._MEIPASS, "background.png")  # PyInstaller temp folder
+else:
+    bg_image_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "background.png")
+
+if not os.path.exists(bg_image_path):
+    print("Warning: background.png not found. Check file path.")
+else:
+    bg_image = Image.open(bg_image_path)
+
+# Open and resize the image
+bg_image = Image.open(bg_image_path)
+bg_image = bg_image.resize((500, 600), Image.LANCZOS)  # Resize to match window size
+
+# Convert to a format Tkinter understands
 bg_photo = ImageTk.PhotoImage(bg_image)
 
-# Set Background Label
+# Create the Label **after defining bg_photo**
 bg_label = tk.Label(root, image=bg_photo)
-bg_label.place(relwidth=1, relheight=1)
+bg_label.place(relwidth=1, relheight=1)  # Make it fill the entire window
 
 # Update background on window resize
 root.bind("<Configure>", update_bg)
