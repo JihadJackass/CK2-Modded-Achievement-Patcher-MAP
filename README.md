@@ -1,5 +1,5 @@
 # CK2 MAP Tool
- Crusder Kings 2 Modded Achievement Patcher (MAP)
+ Crusader Kings 2 Modded Achievement Patcher (MAP)
 
  **Instructions:**
 1. Start the CK2 launcher.
