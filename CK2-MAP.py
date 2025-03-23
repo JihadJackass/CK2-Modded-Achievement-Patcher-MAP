@@ -1,13 +1,16 @@
 import pymem
-import pymem.pattern
+import pymem.process
 import psutil
 import time
 import threading
+import struct
+import re
 import tkinter as tk
 from tkinter import messagebox
 
 running = False
 MEMORY_THRESHOLD_MB = 200
+launcher_detected = False
 
 # Memory patches extracted from the Cheat Engine script
 aob_patterns = {
@@ -28,60 +31,72 @@ memory_patches = {
     "ruler_designer": b"\xC6\x40\x62\x00\xC6\x40\x63\x01\xC6\x40\x65\x01",
 }
 
+def find_pattern(pm, module_base, module_size, pattern_bytes):
+    """ Scans memory for the given pattern and returns the address while respecting wildcards """
+    try:
+        memory_dump = pm.read_bytes(module_base, module_size)
+
+        # Convert `....` wildcards into regex equivalent (any 4 bytes)
+        regex_pattern = re.escape(pattern_bytes).replace(b"\\.\\.\\.\\.", b".{4}")
+
+        match = re.search(regex_pattern, memory_dump, re.DOTALL)
+        if match:
+            return module_base + match.start()  # Convert match position to memory address
+        
+        return None
+    except Exception as e:
+        log_message(f"ERROR: Memory scan failed - {e}")
+        return None
+
+def patch_memory():
+    try:
+        pm = pymem.Pymem("CK2game.exe")
+
+        # Get base address and size
+        module = pymem.process.module_from_name(pm.process_handle, "CK2game.exe")
+        module_base = module.lpBaseOfDll
+        module_size = module.SizeOfImage  # Correct way to retrieve size
+
+        if not module_base:
+            log_message("ERROR: Could not find CK2game.exe module base address.")
+            return
+
+        log_message(f"CK2game.exe Base Address: {hex(module_base)}, Size: {hex(module_size)}")
+
+        # Apply memory patches
+        for key, pattern_bytes in aob_patterns.items():
+            address = find_pattern(pm, module_base, module_size, pattern_bytes)
+
+            if address:
+                pm.write_bytes(address, memory_patches[key], len(memory_patches[key]))
+                log_message(f"Patched {key} at {hex(address)}")
+            else:
+                log_message(f"ERROR: Pattern not found for {key}")
+
+        log_message("Patching complete!")
+        monitor_button.config(text="CK2game.exe Patched")
+
+    except Exception as e:
+        log_message(f"FATAL ERROR: {e}")
+        messagebox.showerror("Error", f"Failed to apply memory patch: {e}")
+
 def get_ck2_process():
     for proc in psutil.process_iter(attrs=['pid', 'name', 'memory_info']):
         if proc.info['name'].lower() == 'ck2game.exe':
             return proc.info['pid'], proc.info['memory_info'].rss // (1024 * 1024)
     return None, 0
 
-def patch_memory():
-    try:
-        pm = pymem.Pymem("CK2game.exe")
-
-        # Get a list of modules for CK2
-        ck2_modules = list(pm.list_modules())
-
-        # Find the CK2game.exe module
-        module_base = None
-        for module in ck2_modules:
-            if "CK2game.exe" in module.name:
-                module_base = module.lpBaseOfDll
-                break
-
-        if not module_base:
-            log_message("Error: Could not find CK2game.exe module base address.")
-            return
-
-        log_message(f"CK2game.exe Base Address: {hex(module_base)}")
-
-        # Apply memory patches
-        for key, pattern in aob_patterns.items():
-            # Scan memory for the pattern
-            address = pymem.pattern.scan_pattern(pm.process_handle, module_base, pattern)
-            
-            if address:
-                # Change memory protections before writing
-                pm.write_bytes(address, memory_patches[key], len(memory_patches[key]))
-                log_message(f"Patched {key} at {hex(address)}")
-            else:
-                log_message(f"Pattern not found for {key}")
-
-        log_message("Patching complete!")
-        monitor_button.config(text="CK2game.exe Patched")
-
-    except Exception as e:
-        log_message(f"Error: {e}")
-        messagebox.showerror("Error", f"Failed to apply memory patch: {e}")
-        
 def monitor_ck2():
-    global running
+    global running, launcher_detected
     monitor_button.config(text="Waiting for CK2game.exe...", state=tk.DISABLED)
     
     while running:
         pid, mem_usage = get_ck2_process()
         if pid:
             if mem_usage < MEMORY_THRESHOLD_MB:
-                log_message("Detected CK2 launcher. Waiting for game to fully start...")
+                if not launcher_detected:
+                    log_message("Detected CK2 launcher. Waiting for game to fully start...")
+                    launcher_detected = True
             else:
                 log_message("Launcher closed. Waiting 3 seconds before applying patch...")
                 time.sleep(3)
@@ -93,9 +108,10 @@ def monitor_ck2():
     monitor_button.config(text="Start Monitoring", state=tk.NORMAL)
 
 def start_monitoring():
-    global running
+    global running, launcher_detected
     if not running:
         running = True
+        launcher_detected = False  # Reset launcher detection for a fresh start
         threading.Thread(target=monitor_ck2, daemon=True).start()
         log_message("Waiting for CK2game.exe to start...")
         monitor_button.config(text="Waiting for CK2game.exe...", state=tk.DISABLED)
@@ -124,11 +140,16 @@ monitor_button = tk.Button(root, text="Start Monitoring", command=start_monitori
 monitor_button.pack(pady=5)
 
 tk.Button(root, text="Stop Monitoring", command=stop_monitoring).pack(pady=5)
-tk.Button(root, text="Exit", command=root.quit).pack(pady=5)
+tk.Button(root, text="Exit", command=root.destroy).pack(pady=5)
 
 # Log Window
 tk.Label(root, text="Log:", font=("Arial", 10, "bold")).pack(anchor="w", padx=10)
+
 log_text = tk.Text(root, height=8, width=50, state=tk.NORMAL)
-log_text.pack(padx=10, pady=5)
+log_text.pack(padx=10, pady=5, expand=True, fill="both")  # Allow resizing
+
+# Make sure the root window resizes properly
+root.columnconfigure(0, weight=1)  # Allow horizontal expansion
+root.rowconfigure(5, weight=1)  # Allow vertical expansion for the log box
 
 root.mainloop()
