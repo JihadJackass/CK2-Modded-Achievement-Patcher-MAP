@@ -17,5 +17,3 @@ Included is the python script, and a build script if you wish to build it into a
 There is an included exe in the releases and /dist folder. I cannot really help if this fails you - You can try building it as stated above.
 
 ![image](https://github.com/user-attachments/assets/3963e7d6-942e-466d-895b-36719981b1d9)
-
-![image](https://github.com/user-attachments/assets/4a8d3f87-824c-435d-bfdf-b6eb0044a7e6)
