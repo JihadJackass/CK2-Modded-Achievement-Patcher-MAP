@@ -3,9 +3,10 @@
 
  **Instructions:**
 1. Start the CK2 launcher.
-2. Run the tool either via the python script (CK2-MAP.py) or (**PREFFERED**) via the .exe in the DIST folder) as Administrator
-3. Apply the patch using this tool each time you run the CK2Launcher/CK2 (it MUST be run in the launcher)
+2. Run the tool either via the python script (CK2-MAP.py) or (**PREFFERED**) via the .exe in the DIST folder) **as Administrator**
+3. Apply the patch using this tool each time you run the CK2Launcher/CK2 (it **MUST be run in the launcher**)
 4. Start the game and play with mods in Ironman mode.
+5. You must use the tool each time you launch CK2, it is currently unable to patch automatically, but I will add this feature soon.
 
 ![image](https://github.com/user-attachments/assets/7f32c04c-4250-46e5-9def-8b8ed1631ea0)
 
