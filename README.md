@@ -15,6 +15,9 @@
 
 There is an included exe in the releases and /dist folder which SHOULD run, and not require any Python. I cannot really help if this fails you
 - You can try building it as stated above and I have included instructions in BUILD_README_FIRST via README_buildexe.bat
+- RELEASES: (![image](https://github.com/user-attachments/assets/38127a9e-fa72-4555-ab60-aef63b5039b0)
+- EXE LOCATION: ![image](https://github.com/user-attachments/assets/719fea74-2d6c-494f-bced-67ebbcc9fbe1)
+
 
 # Python
 
