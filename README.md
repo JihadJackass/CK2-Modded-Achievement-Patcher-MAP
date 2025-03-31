@@ -15,7 +15,6 @@
 # .EXE (**PREFERRED METHOD**)
 
 There is an included exe in the releases and /dist folder which SHOULD run, and not require any Python. If this fails, please comment on Steam, or reach my via my Discord.
-- You can try building it as stated above and I have included instructions in BUILD_README_FIRST via README_buildexe.bat
 - # RELEASES:
 - ![image](https://github.com/user-attachments/assets/38127a9e-fa72-4555-ab60-aef63b5039b0)
 - # EXE LOCATION:
@@ -26,5 +25,7 @@ There is an included exe in the releases and /dist folder which SHOULD run, and 
 
 Included is the python script, and a build script if you wish to build it into an .EXE (though ironically, this requires Python if you wish to build - so it is up to you really)
 - **I highly recommend the exe as it is user friendly**
+
+- - You can try building it as stated above and I have included instructions in BUILD_README_FIRST via README_buildexe.bat
 
 ![image](https://github.com/user-attachments/assets/9edc9c69-a67e-46b2-a6dc-0c0457cda087)
