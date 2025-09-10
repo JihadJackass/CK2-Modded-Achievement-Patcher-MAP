@@ -16,7 +16,7 @@
 
 ### .exe (**PREFERRED METHOD**)
 
-There is an included exe in the releases and /dist folder which SHOULD run, and not require any Python. If this fails, please comment on Steam, or reach my via my Discord.
+There is an included exe in the releases and /dist folder which SHOULD run, and not require any Python. If this fails, please comment on Steam, or reach me via my Discord. (https://discord.gg/VzVujWYz2D)
 - # RELEASES:
 - ![image](https://github.com/user-attachments/assets/38127a9e-fa72-4555-ab60-aef63b5039b0)
 - # EXE LOCATION:
