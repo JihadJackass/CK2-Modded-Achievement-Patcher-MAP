@@ -1,2 +1,4 @@
 /unused
 /.vs
+/bin/Release
+/obj

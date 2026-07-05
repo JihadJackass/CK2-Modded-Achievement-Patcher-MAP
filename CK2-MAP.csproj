@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <AssemblyName>CK2-MAP</AssemblyName>
+    <Product>CK2 Modded Achievement Patcher</Product>
+    <Version>2.0.0</Version>
+
+    <!-- Writing another process's memory needs elevation -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- 64-bit only: CK2game.exe is x64 and so is the trampoline code -->
+    <PlatformTarget>x64</PlatformTarget>
+
+    <!-- Optional: drop a ck2_icon.ico next to this file to use it -->
+    <ApplicationIcon Condition="Exists('ck2_icon.ico')">ck2_icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+</Project>

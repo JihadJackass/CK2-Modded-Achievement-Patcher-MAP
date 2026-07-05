@@ -22,6 +22,7 @@ aob_patterns = {
     "ruler_designer": b"\xC6\x40\x62\x01\x48\x8B\x8B\x10\x6C\x00\x00",  # Ruler Designer check
     "savegame_check": b"\x88\x46\x61\x48\x8B\x03",  # Savegame-altered flag
     "checksum_check": b"\x88\x4F\x63\x48\x8B\x46\x30",  # Checksum (mod detection)
+    "uncorrupt_save": b"\xE8....\xC6\x40\x61\x00\x0F\xB6\x45\xA7\x88", # Savegame Fixer Patch
 }
 
 memory_patches = {
@@ -29,6 +30,7 @@ memory_patches = {
     "ruler_designer": b"\xC6\x40\x62\x00\xC6\x40\x63\x01\xC6\x40\x65\x01",  # Disable RD flag, keep checksum valid
     "savegame_check": b"\x90\x90\x90",  # NOP the instruction that marks the save as altered
     "checksum_check": b"\x90\x90\x90",  # NOP the instruction that marks the checksum as invalid
+    "uncorrupt_save": b"\xC6\x40\x61\x01", # Savegame Fixer Patch
 }
 
 def find_pattern(pm, module_base, module_size, pattern_bytes):
