@@ -52,7 +52,6 @@ internal sealed class MemoryPatcher
 
             long moduleBase = module.BaseAddress.ToInt64();
             int moduleSize = module.ModuleMemorySize;
-            _log($"CK2game.exe base 0x{moduleBase:X}, size 0x{moduleSize:X}");
 
             hProcess = NativeMethods.OpenProcess(NativeMethods.ProcessAccess.Required, false, proc.Id);
             if (hProcess == IntPtr.Zero)
@@ -76,6 +75,10 @@ internal sealed class MemoryPatcher
             }
 
             // ---- 2. Build the code cave layout --------------------------
+            // (Reached only after every signature was found, so this logs
+            //  once on a real patch instead of on every failed retry.)
+            _log($"CK2game.exe base 0x{moduleBase:X}, size 0x{moduleSize:X}");
+
             // Each hook segment = [cave body] + [E9 rel32 back to return].
             var caveBytes = new List<byte>();
             var caveOffset = new Dictionary<string, int>(); // start of each segment
@@ -172,34 +175,59 @@ internal sealed class MemoryPatcher
     }
 
     // -------------------------------------------------------------------
-    // AOB scanning with wildcard support. Reads the module in overlapping
-    // chunks so unreadable pages don't abort the whole scan.
+    // AOB scanning with wildcard support. Walks the module region-by-region
+    // with VirtualQueryEx and only scans committed, readable memory, so a
+    // single guard/no-access page can't cause a real signature to be missed.
     // -------------------------------------------------------------------
-    private IntPtr FindPattern(IntPtr hProcess, long moduleBase, int moduleSize, byte?[] pattern)
+    private static IntPtr FindPattern(IntPtr hProcess, long moduleBase, int moduleSize, byte?[] pattern)
+    {
+        long end = moduleBase + moduleSize;
+        long addr = moduleBase;
+        int mbiSize = System.Runtime.InteropServices.Marshal.SizeOf<NativeMethods.MemoryBasicInformation>();
+
+        while (addr < end)
+        {
+            if (NativeMethods.VirtualQueryEx(hProcess, new IntPtr(addr), out var mbi, new IntPtr(mbiSize)) == IntPtr.Zero)
+                break;
+
+            long regionBase = mbi.BaseAddress.ToInt64();
+            long regionSize = mbi.RegionSize.ToInt64();
+            if (regionSize <= 0) break;
+            long next = regionBase + regionSize;
+
+            bool readable = mbi.State == NativeMethods.MEM_COMMIT
+                            && (mbi.Protect & NativeMethods.PAGE_GUARD) == 0
+                            && (mbi.Protect & NativeMethods.PAGE_NOACCESS) == 0
+                            && (mbi.Protect & NativeMethods.PAGE_READABLE) != 0;
+
+            if (readable)
+            {
+                long scanStart = Math.Max(regionBase, moduleBase);
+                long scanEnd = Math.Min(next, end);
+                IntPtr hit = ScanRange(hProcess, scanStart, scanEnd, pattern);
+                if (hit != IntPtr.Zero) return hit;
+            }
+
+            addr = next;
+        }
+        return IntPtr.Zero;
+    }
+
+    private static IntPtr ScanRange(IntPtr hProcess, long start, long end, byte?[] pattern)
     {
         const int chunk = 0x100000;         // 1 MiB
         int overlap = pattern.Length - 1;
-        long pos = 0;
+        long pos = start;
 
-        while (pos < moduleSize)
+        while (pos < end)
         {
-            int want = (int)Math.Min(chunk, moduleSize - pos);
+            int want = (int)Math.Min(chunk, end - pos);
             byte[] buf;
-            try
-            {
-                buf = NativeMethods.ReadBytes(hProcess, new IntPtr(moduleBase + pos), want);
-            }
-            catch
-            {
-                // Skip this window; advance past it (minus overlap so we don't
-                // miss a match straddling the boundary of a later readable page).
-                pos += Math.Max(1, want - overlap);
-                continue;
-            }
+            try { buf = NativeMethods.ReadBytes(hProcess, new IntPtr(pos), want); }
+            catch { pos += Math.Max(1, want - overlap); continue; }
 
             int idx = IndexOf(buf, pattern);
-            if (idx >= 0)
-                return new IntPtr(moduleBase + pos + idx);
+            if (idx >= 0) return new IntPtr(pos + idx);
 
             if (want < chunk) break;
             pos += want - overlap; // keep overlap so cross-boundary matches are found

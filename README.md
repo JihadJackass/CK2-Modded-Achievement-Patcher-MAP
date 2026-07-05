@@ -8,7 +8,7 @@ of the original Python tool with three goals:
    force the achievement flags and then re-execute the original game
    instructions, exactly like the Cheat Engine table does. The old tool
    overwrote instructions in place, which destroyed register state and baked
-   inconsistent flags into saves — that was the source of the corruption.
+   inconsistent flags into saves - that was the source of the corruption.
 2. **Auto-detection.** It watches for `CK2game.exe` and patches automatically
    the moment the game has loaded. No need to time it manually.
 3. **A real .exe.** Compiles to a single self-contained Windows executable
@@ -17,7 +17,7 @@ of the original Python tool with three goals:
 ## Requirements to build
 
 - Windows 10/11 (x64)
-- [.NET 8 SDK](https://dotnet.microsoft.com/download) — the only prerequisite.
+- [.NET 8 SDK](https://dotnet.microsoft.com/download) - the only prerequisite.
   There are **no NuGet dependencies**, so the build works fully offline once
   the SDK is installed.
 
@@ -30,7 +30,7 @@ From the project folder (the one containing `CK2-MAP.csproj`):
 dotnet build -c Release
 ```
 
-Recommended — one self-contained .exe that runs on any Windows PC with no
+Recommended - one self-contained .exe that runs on any Windows PC with no
 .NET install:
 
 ```powershell
@@ -67,8 +67,8 @@ nothing to uninstall.
 ## What it actually changes
 
 Four signatures inside `CK2game.exe` are hooked. At each one the cave sets the
-achievement-eligibility bytes on the relevant struct — save-file unaltered = 1,
-ruler-designer-used = 0, checksum-vanilla = 1, steam-enabled = 1 — and then
+achievement-eligibility bytes on the relevant struct - save-file unaltered = 1,
+ruler-designer-used = 0, checksum-vanilla = 1, steam-enabled = 1 - and then
 runs the original displaced instruction so the game continues normally:
 
 | Hook | Original instruction re-executed |
@@ -85,13 +85,13 @@ Paradox patches the game, the signatures may change and the scan will report
 
 ## Files
 
-- `Program.cs` — entry point
-- `MainForm.cs` — UI + auto-detect monitor
-- `MemoryPatcher.cs` — AOB scan, code cave, trampoline install (the core)
-- `PatchSet.cs` — the four hook definitions (edit here for new game versions)
-- `NativeMethods.cs` — Win32 P/Invoke
-- `app.manifest` — requests Administrator elevation
-- `CK2-MAP.csproj` — build config (x64, WinForms, .NET 8)
+- `Program.cs` - entry point
+- `MainForm.cs` - UI + auto-detect monitor
+- `MemoryPatcher.cs` - AOB scan, code cave, trampoline install (the core)
+- `PatchSet.cs` - the four hook definitions (edit here for new game versions)
+- `NativeMethods.cs` - Win32 P/Invoke
+- `app.manifest` - requests Administrator elevation
+- `CK2-MAP.csproj` - build config (x64, WinForms, .NET 8)
 
 ## Note
 

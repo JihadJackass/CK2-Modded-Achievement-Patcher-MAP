@@ -35,6 +35,34 @@ internal static class NativeMethods
         ExecuteReadWrite  = 0x40,
     }
 
+    public const uint MEM_COMMIT   = 0x1000;
+    public const uint PAGE_GUARD    = 0x100;
+    public const uint PAGE_NOACCESS = 0x001;
+    // Any protection from which ReadProcessMemory can read.
+    public const uint PAGE_READABLE =
+        0x02 | 0x04 | 0x08 | 0x20 | 0x40 | 0x80; // RO, RW, WC, XR, XRW, XWC
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MemoryBasicInformation
+    {
+        public IntPtr BaseAddress;
+        public IntPtr AllocationBase;
+        public uint   AllocationProtect;
+        public uint   Alignment1;
+        public IntPtr RegionSize;
+        public uint   State;
+        public uint   Protect;
+        public uint   Type;
+        public uint   Alignment2;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr VirtualQueryEx(
+        IntPtr hProcess,
+        IntPtr lpAddress,
+        out MemoryBasicInformation lpBuffer,
+        IntPtr dwLength);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     public static extern IntPtr OpenProcess(
         ProcessAccess dwDesiredAccess,

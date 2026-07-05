@@ -18,8 +18,16 @@
     <!-- 64-bit only: CK2game.exe is x64 and so is the trampoline code -->
     <PlatformTarget>x64</PlatformTarget>
 
-    <!-- Optional: drop a ck2_icon.ico next to this file to use it -->
-    <ApplicationIcon Condition="Exists('ck2_icon.ico')">ck2_icon.ico</ApplicationIcon>
+    <!-- Embeds the icon into the .exe (Explorer + taskbar file icon) -->
+    <ApplicationIcon>ck2_icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Also embed it as a resource so the window/taskbar icon works
+         without shipping a loose .ico next to the exe -->
+    <EmbeddedResource Include="ck2_icon.ico">
+      <LogicalName>ck2_icon.ico</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>
