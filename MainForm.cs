@@ -264,11 +264,15 @@ internal sealed class MainForm : Form
     // Subtle vertical gradient background for a less "flat gray" look.
     protected override void OnPaintBackground(PaintEventArgs e)
     {
+        var rect = ClientRectangle;
+        if (rect.Width <= 0 || rect.Height <= 0)
+            return; // client area not laid out yet (startup/minimize)
+
         using var brush = new LinearGradientBrush(
-            ClientRectangle,
+            rect,
             Color.FromArgb(28, 32, 56),
             Color.FromArgb(18, 20, 36),
             LinearGradientMode.Vertical);
-        e.Graphics.FillRectangle(brush, ClientRectangle);
+        e.Graphics.FillRectangle(brush, rect);
     }
 }
