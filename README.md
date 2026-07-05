@@ -22,6 +22,8 @@ of the original Python tool with three goals:
 
 ## Build
 
+**There is an included build.bat that can simply build the tool if you wish to bypass all this extra nonsense if you are not keen on programming or any of these things.**
+
 From the project folder (the one containing `CK2-MAP.csproj`):
 
 ```powershell
