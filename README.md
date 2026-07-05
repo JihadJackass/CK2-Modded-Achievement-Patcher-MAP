@@ -6,9 +6,8 @@ of the original Python tool with three goals:
 
 1. **Save-safe patching.** It installs *trampoline hooks* (a code cave) that
    force the achievement flags and then re-execute the original game
-   instructions, exactly like the Cheat Engine table does. The old tool
-   overwrote instructions in place, which destroyed register state and baked
-   inconsistent flags into saves - that was the source of the corruption.
+   instructions. The old tool overwrote instructions in place, which destroyed register state and baked
+   inconsistent flags into saves.
 2. **Auto-detection.** It watches for `CK2game.exe` and patches automatically
    the moment the game has loaded. No need to time it manually.
 3. **A real .exe.** Compiles to a single self-contained Windows executable
@@ -78,9 +77,7 @@ runs the original displaced instruction so the game continues normally:
 | savegame_check | `mov rax, [rbx]` |
 | checksum_check | `mov rax, [rsi+30]` |
 
-This mirrors the ENABLE block of the
-`0FRCrusader_Kings_II_v3_3_3_Extension.CT` table for game version 3.3.3. If
-Paradox patches the game, the signatures may change and the scan will report
+If Paradox patches the game, the signatures may change and the scan will report
 "signature not found"; the AOBs in `PatchSet.cs` would then need updating.
 
 ## Files
