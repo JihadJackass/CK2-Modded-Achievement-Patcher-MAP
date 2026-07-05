@@ -22,7 +22,7 @@ of the original Python tool with three goals:
 
 ## Build
 
-**There is an included build.bat that can simply build the tool if you wish to bypass all this extra nonsense if you are not keen on programming or any of these things.**
+**There is an included build.bat that can simply build the tool if you wish to bypass all this extra nonsense if you are not keen on programming or any of these things. - in which case you should simply use the latest release anyways: https://github.com/JihadJackass/CK2-Modded-Achievement-Patcher-MAP/releases/tag/win64-release-2.2.0**
 
 From the project folder (the one containing `CK2-MAP.csproj`):
 
